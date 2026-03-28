@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SHAMBHALA | REBORN 2026</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@900&family=Fraunces:ital,opsz,wght@0,9..144,900;1,9..144,900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --bg: #000; --text: #fff; --accent: #ff3e00; --ease: cubic-bezier(0.85, 0, 0.15, 1); }
+        [data-theme='stille'] { --bg: #fdfdfd; --text: #1a1a1a; --accent: #0055ff; }
+        [data-theme='dynamik'] { --bg: #000; --text: #fff; --accent: #ff3e00; }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; transition: background 0.8s var(--ease); overflow-x: hidden; width: 100vw; height: 100vh; }
+
+        /* INTRO GATE (FIXED) */
+        #split-intro { position: fixed; inset: 0; display: flex; z-index: 9000; transition: transform 0.6s var(--ease); }
+        .side { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; }
+        .side.stille { background: #fff; color: #000; }
+        .side.dynamik { background: #000; color: #fff; }
+        .side h1 { font-size: 12vw; font-weight: 900; pointer-events: none; }
+        #split-intro.hidden { transform: translateY(-100%); pointer-events: none; }
+
+        /* MAIN APP CONTAINER */
+        #app-main { position: relative; z-index: 100; opacity: 1; transition: opacity 0.5s; display: none; width: 100%; }
+        #app-main.visible { display: block; }
+
+        .section { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 20px; text-align: center; }
+        .roast-title { font-family: 'Fraunces', serif; font-size: 3rem; line-height: 0.9; margin-bottom: 20px; color: var(--accent); }
+
+        /* TRAINER & GOLDEN AGER BUBBLES */
+        .staff-grid { display: flex; gap: 20px; padding: 20px; width: 100%; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+        .staff-bubble { 
+            min-width: 180px; height: 180px; background: var(--accent); border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; 
+            color: white; scroll-snap-align: center; cursor: pointer; position: relative; 
+            background-size: cover; background-position: center; transition: 0.4s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .staff-bubble span { position: absolute; bottom: 20px; font-size: 0.6rem; font-weight: 900; background: rgba(0,0,0,0.7); padding: 5px 12px; border-radius: 20px; color: #fff; }
+
+        /* MANIFEST OVERLAY (GOLDEN AGER FIX) */
+        #manifest-overlay { 
+            position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.95); backdrop-filter: blur(15px);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;
+            padding: 30px; opacity: 0; pointer-events: none; transition: 0.4s var(--ease); 
+        }
+        #manifest-overlay.active { opacity: 1; pointer-events: auto; }
+        #manifest-overlay .gold-copy { color: #fff; line-height: 1.6; font-size: 1.1rem; max-width: 400px; margin: 20px 0; }
+
+        /* CTA BUTTON */
+        #join-cta { 
+            background: var(--accent); color: white; text-decoration: none; padding: 20px 40px; 
+            border-radius: 100px; display: flex; flex-direction: column; align-items: center;
+            font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .course-grid { display: flex; gap: 15px; overflow-x: auto; width: 100%; padding: 20px; filter: url('#goo'); }
+        .course-circle { min-width: 120px; height: 120px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 0.7rem; transition: 0.3s; }
+        .course-circle.active { transform: scale(1.2); box-shadow: 0 0 30px var(--accent); }
+
+        svg { position: absolute; width: 0; height: 0; }
+    </style>
+</head>
+<body>
+
+    <svg><defs><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="10" /><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 18 -7" /></filter></defs></svg>
+
+    <div id="split-intro">
+        <div class="side stille" onclick="initApp('stille')"><h1>STILLE</h1></div>
+        <div class="side dynamik" onclick="initApp('dynamik')"><h1>DYNAMIK</h1></div>
+    </div>
+
+    <div id="manifest-overlay">
+        <h2 style="font-family: 'Fraunces'; color: var(--accent); font-size: 2.2rem;">Golden Ager</h2>
+        <div class="gold-copy">
+            Fit & fröhlich durchs Leben! Mit Achtsamkeit und Freude Körper und Geist lebendig halten – auch in der zweiten Lebenshälfte.
+        </div>
+        <a id="join-cta" href="https://wa.me/4314084786">
+            <span>Kurs beitreten</span>
+            <small style="font-size: 0.6rem; opacity: 0.8;">Do 10:00 | Josefstädter Str. 5</small>
+        </a>
+        <p onclick="closeManifest()" style="margin-top: 30px; opacity: 0.5; font-size: 0.8rem; cursor: pointer;">Schließen</p>
+    </div>
+
+    <main id="app-main">
+        <section class="section">
+            <h2 id="dynamic-title" class="roast-title"></h2>
+            <p id="dynamic-roast" style="opacity: 0.8;"></p>
+        </section>
+
+        <section class="section">
+            <h3 style="font-size: 0.7rem; letter-spacing: 4px; margin-bottom: 30px; opacity: 0.5;">TEAM & SPIRIT</h3>
+            <div class="staff-grid" id="staff-grid"></div>
+        </section>
+
+        <section class="section" style="background: rgba(128,128,128,0.05);">
+            <h2 class="roast-title">DEIN WEG</h2>
+            <div class="course-grid" id="course-grid"></div>
+            <p id="booking-msg" style="margin-top: 20px; font-weight: 900;">Tippe einen Kurs zum Buchen</p>
+        </section>
+
+        <div onclick="location.reload()" style="padding: 60px; text-align: center; opacity: 0.2; font-size: 0.6rem; letter-spacing: 5px;">REBIRTH</div>
+    </main>
+
+    <script>
+        const content = {
+            stille: {
+                title: "DIE STILLE SPRENGT ALLES.",
+                roast: "Deine alte Website war digitaler Tinnitus. Hier zählt nur der Fokus. Kein Suchen, nur Sein.",
+                staff: [
+                    { name: "GOLDEN AGER", img: "yiya.jpg", special: true },
+                    { name: "ZEN MASTER", img: "https://www.shambhala.at/wp-content/uploads/2021/07/DSC01128-3.jpg", special: false }
+                ],
+                courses: ["ZEN", "TCM", "MEDITATION"]
+            },
+            dynamik: {
+                title: "FLOW OHNE GRENZEN.",
+                roast: "Wer Energie will, braucht keinen PDF-Bewerbungsbogen. Wir zünden den kinetischen Turbo.",
+                staff: [
+                    { name: "GOLDEN VITAL", img: "yiya.jpg", special: true },
+                    { name: "POWER YOGA", img: "https://www.shambhala.at/wp-content/uploads/2021/07/DSC01128-3.jpg", special: false }
+                ],
+                courses: ["YOGA", "TAIJI", "QIGONG"]
+            }
+        };
+
+        function initApp(mode) {
+            // Intro wegschieben
+            document.getElementById('split-intro').classList.add('hidden');
+            document.getElementById('app-main').classList.add('visible');
+            document.documentElement.setAttribute('data-theme', mode);
+
+            // Titel & Roast setzen
+            document.getElementById('dynamic-title').innerText = content[mode].title;
+            document.getElementById('dynamic-roast').innerText = content[mode].roast;
+
+            // Trainer Grid bauen
+            const grid = document.getElementById('staff-grid');
+            grid.innerHTML = '';
+            content[mode].staff.forEach(s => {
+                const bubble = document.createElement('div');
+                bubble.className = 'staff-bubble';
+                bubble.style.backgroundImage = `url('${s.img}')`;
+                bubble.innerHTML = `<span>${s.name}</span>`;
+                
+                // Klick-Event FIX
+                bubble.onclick = function() {
+                    if (s.special) {
+                        openManifest();
+                    } else {
+                        if ("vibrate" in navigator) navigator.vibrate(20);
+                        this.style.transform = "scale(1.1)";
+                        setTimeout(() => this.style.transform = "scale(1)", 200);
+                    }
+                };
+                grid.appendChild(bubble);
+            });
+
+            // Kurs Grid bauen
+            const cGrid = document.getElementById('course-grid');
+            cGrid.innerHTML = '';
+            content[mode].courses.forEach(c => {
+                const circle = document.createElement('div');
+                circle.className = 'course-circle';
+                circle.innerText = c;
+                circle.onclick = function() {
+                    this.classList.toggle('active');
+                    const activeCount = document.querySelectorAll('.course-circle.active').length;
+                    document.getElementById('booking-msg').innerText = activeCount + " KURS(E) GEWÄHLT";
+                    if ("vibrate" in navigator) navigator.vibrate(40);
+                };
+                cGrid.appendChild(circle);
+            });
+        }
+
+        function openManifest() {
+            document.getElementById('manifest-overlay').classList.add('active');
+            if ("vibrate" in navigator) navigator.vibrate(100);
+        }
+
+        function closeManifest() {
+            document.getElementById('manifest-overlay').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
